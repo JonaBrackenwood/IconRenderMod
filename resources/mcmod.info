@@ -1,0 +1,16 @@
+[
+{
+  "modid": "iconrendermod",
+  "name": "Icon Render Mod",
+  "description": "This mod will render each block individually and print this render to an image file.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["JonaBrackenwood"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
