@@ -79,13 +79,13 @@ public class IconRenderMod
 			// Render a Minecraft block or item
 			// Commented out code is used for lighting and size
 			
-	        //GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+			//GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 			//RenderHelper.enableGUIStandardItemLighting();
-	        //GL11.glScalef(10F, 10F, 10F);
+			//GL11.glScalef(10F, 10F, 10F);
 			itemRenderer.renderItemIntoGUI(mc.fontRenderer, mc.getTextureManager(), is, 0, 0);
 			//GL11.glScalef(0.1F, 0.1F, 0.1F);
 			//RenderHelper.disableStandardItemLighting();
-	        //GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+			//GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 
 			// Unbind framebuffer
 			EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, 0);
