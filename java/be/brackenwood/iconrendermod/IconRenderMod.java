@@ -19,6 +19,8 @@ import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.EXTFramebufferObject.*;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -56,41 +58,54 @@ public class IconRenderMod
 			// Create itemstack object out of b
 			is = new ItemStack(GameData.itemRegistry.getObject((String) b),1,0);
 
+			// Clear some buffers
+			glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
 			// Create and bind framebuffer
-			int fbo = EXTFramebufferObject.glGenFramebuffersEXT();
-			EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, fbo);
+			int fbo = glGenFramebuffersEXT();
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
 			// Create and bind depthbuffer
-			int drb = EXTFramebufferObject.glGenRenderbuffersEXT();
-			EXTFramebufferObject.glBindRenderbufferEXT(EXTFramebufferObject.GL_RENDERBUFFER_EXT, drb);
-			EXTFramebufferObject.glRenderbufferStorageEXT(EXTFramebufferObject.GL_RENDERBUFFER_EXT, GL11.GL_DEPTH_COMPONENT, size, size);
-			EXTFramebufferObject.glFramebufferRenderbufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, EXTFramebufferObject.GL_DEPTH_ATTACHMENT_EXT, EXTFramebufferObject.GL_RENDERBUFFER_EXT, drb);
+			int drb = glGenRenderbuffersEXT();
+			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, drb);
+			glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT, size, size);
+			glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, drb);
 
 			// Create and bind texture
-			int tex = GL11.glGenTextures();
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+			int tex = glGenTextures();
+			glBindTexture(GL_TEXTURE_2D, tex);
 
 			// Specify a texture image
-			GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0,GL11.GL_RGBA8, size, size, 0,GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
+			glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA8, size, size, 0,GL_RGBA, GL_UNSIGNED_BYTE, (ByteBuffer)null);
 
 			// Bind texture to framebuffer
-			EXTFramebufferObject.glFramebufferTexture2DEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT, GL11.GL_TEXTURE_2D, tex, 0);
-
+			glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, tex, 0);
+			
 			// Render a Minecraft block or item
 			// Commented out code is used for lighting and size
-			
-	        //GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+			glLoadIdentity();
+	        glEnable(GL12.GL_RESCALE_NORMAL);
 			//RenderHelper.enableGUIStandardItemLighting();
-	        //GL11.glScalef(10F, 10F, 10F);
+	        //glScalef(10F, 10F, 10F);
 			itemRenderer.renderItemIntoGUI(mc.fontRenderer, mc.getTextureManager(), is, 0, 0);
-			//GL11.glScalef(0.1F, 0.1F, 0.1F);
+			//glScalef(0.1F, 0.1F, 0.1F);
 			//RenderHelper.disableStandardItemLighting();
-	        //GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+	        glDisable(GL12.GL_RESCALE_NORMAL);
+			
+			/* Draw a rectangle
+			glBegin(GL_TRIANGLES);
+			glColor3f(1.0f, 0.0f, 0.0f);
+			glVertex3f(0, 0, 0);
+			glVertex3f(1, 0, 0);
+			glVertex3f(0, 1, 0);
+			glEnd();
+			*/
 
 			// Unbind framebuffer
-			EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, 0);
+			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
-			// Based on a screenshot making class
+			// Based on the minecraft screenshot-helper
 			int k = size * size;
 
 			if (pixelBuffer == null || pixelBuffer.capacity() < k)
@@ -99,12 +114,12 @@ public class IconRenderMod
 				pixelValues = new int[k];
 			}
 
-			GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
-			GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
+			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			pixelBuffer.clear();
 
-			GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
-			GL11.glGetTexImage(GL11.GL_TEXTURE_2D, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixelBuffer);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			glGetTexImage(GL_TEXTURE_2D, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixelBuffer);
 
 			pixelBuffer.get(pixelValues);
 			TextureUtil.func_147953_a(pixelValues, size, size);
@@ -128,6 +143,9 @@ public class IconRenderMod
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			// For generating only one image, we break the for loop.
+			//break;
 		}
 
 

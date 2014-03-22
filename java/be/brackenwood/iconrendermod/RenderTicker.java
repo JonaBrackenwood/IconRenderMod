@@ -34,8 +34,7 @@ public class RenderTicker {
 	@SubscribeEvent
 	public void onTick(RenderTickEvent event)
 	{
-		if (event.phase.equals(Phase.START))
-			return;
+		if (event.phase.equals(Phase.START)) return;
 
 		if (!onTickInGame(mc))
 		{
